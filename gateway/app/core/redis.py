@@ -1,17 +1,22 @@
-from redis.asyncio import Redis
+import os
+import redis.asyncio as redis
 from loguru import logger
-from app.config.settings import settings
 
-redis_client: Redis | None = None
+_redis = None
 
+async def get_redis():
+    global _redis
+    if _redis is None:
+        redis_url = os.getenv("REDIS_URL")
 
-async def get_redis() -> Redis:
-    global redis_client
-    if redis_client is None:
-        redis_client = Redis(
-            host=settings.redis_host,
-            port=settings.redis_port,
+        if not redis_url:
+            raise RuntimeError("REDIS_URL is not set")
+
+        _redis = redis.from_url(
+            redis_url,
             decode_responses=True
         )
+
         logger.info("Connected to Redis")
-    return redis_client
+
+    return _redis
