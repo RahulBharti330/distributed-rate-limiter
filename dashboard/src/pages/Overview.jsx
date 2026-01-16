@@ -3,6 +3,8 @@ import StatCard from "../components/StatCard";
 import RequestsBarChart from "../components/RequestsBarChart";
 import RequestsPieChart from "../components/RequestsPieChart";
 import { useMetrics } from "../hooks/useMetrics";
+import SimulationControl from "../components/SimulationControl";
+
 
 function Overview() {
   const { data, isLoading, isError } = useMetrics();
@@ -17,6 +19,7 @@ function Overview() {
 
   return (
     <MainLayout>
+        <SimulationControl />
       <div style={{ display: "flex", gap: "20px", marginBottom: "24px" }}>
         <StatCard
           title="Total Requests"
