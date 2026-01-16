@@ -51,8 +51,12 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         metrics.record_allowed()
         response = await call_next(request)
 
-        response.headers["X-RateLimit-Limit"] = str(rate_limiter.capacity)
+        response.headers["X-RateLimit-Limit"] = str(result.limit)
         response.headers["X-RateLimit-Remaining"] = str(result.remaining)
+
+        if not result.allowed and result.retry_after:
+            response.headers["Retry-After"] = str(result.retry_after)
+
 
         # after user-level rate limit passes
         server_capacity = await get_server_capacity()
