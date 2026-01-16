@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import {api} from "../api/client.js";
 
 function PolicyManager() {
   const [tier, setTier] = useState("free");
@@ -7,7 +8,7 @@ function PolicyManager() {
   const [refillRate, setRefillRate] = useState("");
 
   const updatePolicy = async () => {
-    await axios.post("http://localhost:8000/admin/policy/update", {
+    await api.post("/admin/policy/update", {
       tier,
       capacity: Number(capacity),
       refill_rate: Number(refillRate),

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
+import { api } from "../api/client";
 
 function SimulationControl() {
   const [config, setConfig] = useState({
@@ -15,7 +16,7 @@ function SimulationControl() {
   };
 
   const startSimulation = async () => {
-    await axios.post("http://localhost:8000/admin/simulate/start", {
+    await api.post("/admin/simulate/start", {
       ...config,
       endpoint: "/api/data",
       user_tier: "free",
@@ -23,13 +24,13 @@ function SimulationControl() {
   };
 
   const updateServerCapacity = async () => {
-    await axios.post("http://localhost:8000/admin/server-capacity", {
+    await api.post("/admin/server-capacity", {
       max_rps: Number(serverCapacity),
     });
   };
 
   const resetMetrics = async () => {
-    await axios.post("http://localhost:8000/admin/metrics/reset");
+    await api.post("/admin/metrics/reset");
   };
 
   return (
