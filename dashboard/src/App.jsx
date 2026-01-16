@@ -1,9 +1,10 @@
 import { Routes, Route } from "react-router-dom";
+import Overview from "./pages/Overview";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<h1>Rate Limiter Dashboard</h1>} />
+      <Route path="/" element={<Overview />} />
     </Routes>
   );
 }
