@@ -5,11 +5,18 @@ from app.core.metrics import metrics
 
 rate_limiter = RateLimiter()
 
+EXCLUDED_PATHS = ("/health", "/admin")
+
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        api_name = request.url.path
+        path = request.url.path
 
+        # 🔹 Exclude control-plane endpoints
+        if path.startswith(EXCLUDED_PATHS):
+            return await call_next(request)
+
+        api_name = path
         result = await rate_limiter.check(request, api_name)
 
         if not result.allowed:
