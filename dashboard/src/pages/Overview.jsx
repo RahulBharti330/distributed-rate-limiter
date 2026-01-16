@@ -4,6 +4,7 @@ import RequestsBarChart from "../components/RequestsBarChart";
 import RequestsPieChart from "../components/RequestsPieChart";
 import { useMetrics } from "../hooks/useMetrics";
 import SimulationControl from "../components/SimulationControl";
+import PolicyManager from "../components/PolicyManager";
 
 
 function Overview() {
@@ -19,6 +20,7 @@ function Overview() {
 
   return (
     <MainLayout>
+        <PolicyManager />
         <SimulationControl />
       <div style={{ display: "flex", gap: "20px", marginBottom: "24px" }}>
         <StatCard

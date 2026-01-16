@@ -1,9 +1,10 @@
 import time
+from pathlib import Path
 from fastapi import Request
+from loguru import logger
+
 from app.core.redis import get_redis
 from app.rate_limiter.identifier import identify_request
-from pathlib import Path
-from loguru import logger
 
 
 class RateLimitResult:
@@ -15,15 +16,24 @@ class RateLimitResult:
 
 class RateLimiter:
     def __init__(self):
-        self.capacity = 10
-        self.refill_rate = 1
         self.lua_script = self._load_lua_script()
 
     def _load_lua_script(self) -> str:
         script_path = Path(__file__).parent / "token_bucket.lua"
         return script_path.read_text()
 
-    async def check(self, request: Request, api_name: str) -> RateLimitResult:
+    async def check(
+        self,
+        request: Request,
+        api_name: str,
+        policy: dict
+    ) -> RateLimitResult:
+        """
+        Enforce token bucket rate limiting using a dynamic policy.
+        """
+        capacity = policy["capacity"]
+        refill_rate = policy["refill_rate"]
+
         redis = await get_redis()
         identifier = await identify_request(request)
         key = f"rate_limit:{identifier}:{api_name}"
@@ -34,16 +44,19 @@ class RateLimiter:
             self.lua_script,
             1,
             key,
-            self.capacity,
-            self.refill_rate,
+            capacity,
+            refill_rate,
             now
         )
 
-        logger.info(f"Rate limit decision → allowed={allowed}, remaining={remaining}")
+        logger.info(
+            f"Rate limit → id={identifier}, api={api_name}, "
+            f"allowed={allowed}, remaining={remaining}"
+        )
 
         retry_after = None
         if not allowed:
-            retry_after = int(1 / self.refill_rate)
+            retry_after = max(1, int(1 / refill_rate))
 
         return RateLimitResult(
             allowed=allowed == 1,
